@@ -8,8 +8,6 @@ from streamlit.logger import get_logger
 
 load_dotenv(".env")
 
-load_dotenv(".env")
-
 logger = get_logger(__name__)
 
 client = OpenAI(api_key=os.getenv("OPENAI_TOKEN"))
