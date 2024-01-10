@@ -1,0 +1,18 @@
+services:
+  bot:
+    build:
+      context: ./docker-bot
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 8504:8504
+
+  yt-whisper:
+    build:
+      context: ./yt-whisper
+      dockerfile: Dockerfile
+    ports:
+      - 8503:8503
+    env_file:
+      - .env
