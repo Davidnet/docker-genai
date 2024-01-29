@@ -32,7 +32,7 @@ def load_pinecone(index_name="docker-genai"):
 
 def generate_response(input_text):
     question_embedding = client.embeddings.create(
-        input=[input_text], model="text-embedding-ada-002"
+        input=[input_text], model="text-embedding-3-small"
     )
     num_embeddings = list(question_embedding.data[0].embedding)
     # print(list(question_embedding.data[0].embedding))
@@ -68,12 +68,12 @@ def generate_response(input_text):
             },
             {"role": "user", "content": input_text},
         ],
-        model="gpt-4-1106-preview",
+        model="gpt-4-turbo-preview",
     )
     response = chat_completion.choices[0].message.content
 
     # Add video references
-    response += "\n" + references
+    response += "\n Click on the following for more information: " + references
 
     return response
 

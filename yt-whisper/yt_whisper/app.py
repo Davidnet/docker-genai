@@ -89,7 +89,7 @@ def process_video(video_url: str) -> dict[str, str]:
                     for t in video_data
                 ]
                 embeddings = client.embeddings.create(
-                    input=batch_transcripts, model="text-embedding-ada-002"
+                    input=batch_transcripts, model="text-embedding-3-small"
                 )
                 batch_embeds = [e.embedding for e in embeddings.data]
                 to_upsert = list(zip(batch_ids, batch_embeds, batch_metadata))
