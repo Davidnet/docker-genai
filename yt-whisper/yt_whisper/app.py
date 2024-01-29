@@ -3,10 +3,10 @@ import tempfile
 from pathlib import Path
 from tempfile import mkdtemp
 
-import pinecone
 import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
+from pinecone import Pinecone, ServerlessSpec
 from pytube import YouTube
 from pytube.exceptions import RegexMatchError
 from streamlit.logger import get_logger
@@ -23,14 +23,16 @@ client = OpenAI(api_key=os.getenv("OPENAI_TOKEN"))
 @st.cache_resource
 def load_pinecone(index_name="docker-genai"):
     # initialize pinecone
-    pinecone.init(
-        api_key=os.getenv("PINECONE_TOKEN"),
-        environment=os.getenv("PINECONE_ENVIRONMENT"),
-    )
-    if index_name not in pinecone.list_indexes():
-        # we create a new index
-        pinecone.create_index(name=index_name, metric="cosine", dimension=1536)
-    index = pinecone.Index(index_name)
+    pc = Pinecone(api_key=os.getenv("PINECONE_TOKEN"))
+
+    if index_name not in pc.list_indexes().names():
+        pc.create_index(
+            name=index_name,
+            dimension=1536,
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region="us-west-2"),
+        )
+    index = pc.Index(index_name)
     return index
 
 
@@ -48,7 +50,7 @@ def process_video(video_url: str) -> dict[str, str]:
             audio_stream = yt_handler.streams.filter(only_audio=True).first()
             audio_file = audio_stream.download(tmp_dir)
             file_stats = os.stat(audio_file)
-            logger.info(f"File size: {file_stats.st_size}")
+            logger.info(f"File size(bytes): {file_stats.st_size}")
             logger.info(f"File name: {audio_file}")
             if file_stats.st_size > 24 * 1024 * 1024:  # 25 MB Limit check
                 # TODO(davidnet): Split and process the video in chunks
@@ -127,7 +129,7 @@ def disable(b):
 
 
 def main():
-    logger.info("Rendering app")
+    logger.debug("Rendering app")
     if "tempfolder" not in st.session_state:
         st.session_state.tempfolder = Path(mkdtemp(prefix="yt_transcription_"))
     if "videos" not in st.session_state:

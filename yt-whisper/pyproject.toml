@@ -6,12 +6,12 @@ authors = ["David Cardozo <david.cardozo@me.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13"
 streamlit = "^1.29.0"
 python-dotenv = "^1.0.0"
 pytube = "^15.0.0"
 openai = "^1.7.0"
-pinecone-client = "^2.2.4"
+pinecone-client = "^3.0.2"
 
 
 [tool.poetry.group.dev.dependencies]
