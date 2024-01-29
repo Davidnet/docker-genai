@@ -1,9 +1,9 @@
 import os
 
-import pinecone
 import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
+from pinecone import Pinecone, ServerlessSpec
 from streamlit.logger import get_logger
 
 load_dotenv(".env")
@@ -16,14 +16,17 @@ client = OpenAI(api_key=os.getenv("OPENAI_TOKEN"))
 @st.cache_resource
 def load_pinecone(index_name="docker-genai"):
     # initialize pinecone
-    pinecone.init(
-        api_key=os.getenv("PINECONE_TOKEN"),
-        environment=os.getenv("PINECONE_ENVIRONMENT"),
-    )
-    if index_name not in pinecone.list_indexes():
-        # we create a new index
-        pinecone.create_index(name=index_name, metric="cosine", dimension=1536)
-    index = pinecone.Index(index_name)
+    pc = Pinecone(api_key=os.getenv("PINECONE_TOKEN"))
+
+    if index_name not in pc.list_indexes().names():
+        logger.info(f"Creating index {index_name}, therefore there are no videos yet.")
+        pc.create_index(
+            name=index_name,
+            dimension=1536,
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region="us-west-2"),
+        )
+    index = pc.Index(index_name)
     return index
 
 
